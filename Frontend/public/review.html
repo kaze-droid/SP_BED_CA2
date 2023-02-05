@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <!-- Insert css -->
+    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/review.css">
+    <link rel="stylesheet" href="css/header.css">
+    <title id="title"></title>
+</head>
+
+
+<script>
+    $(document).ready(() => {
+        // Get details of specific film id based on url
+        // Get film_id from query
+        const urlParams = new URLSearchParams(window.location.search);
+        let filmid = "";
+        if (urlParams.has("filmid")) {
+            filmid = urlParams.get("filmid");
+        } else {
+            console.log("error");
+            window.location.assign("search");
+        }
+
+        const jwt = localStorage.getItem("JWT");
+        const userData = localStorage.getItem("userData");
+        // If user not logged in
+        if (jwt == null || userData == null || jwt == "" || userData == "" || 'customer_id' in JSON.parse(userData) == false || JSON.parse(userData).customer_id == null) {
+            window.location.assign("login");
+        }
+
+        // Make an ajax call to get data based on film id
+        $.ajax({
+            url: `http://localhost:8080/film/${filmid}`,
+            method: "GET",
+            success: (res, status, xhr) => {
+                if (res && res.success) {
+                    // Result is an array of json objects. All the properties are the same except for 
+                    // Actor first name and last name
+                    const userdata = res.UserData[0];
+
+                    const title = $("title");
+                    const filmTitle = $("#filmTitle");
+                    
+                    title.text(userdata.title);
+                    filmTitle.text(userdata.title);
+                }
+            },
+            error: (xhr, status, error) => {
+                console.log(error);
+            }
+        });
+
+        // Make an ajax call to get data based on film id
+        $.ajax({
+            url: `http://localhost:8080/reviews/${filmid}`,
+            method: "GET",
+            success: (res, status, xhr) => {
+                if (res && res.success) {
+                    const result = res.UserData;
+
+                    // Show the reviews
+                    for (let i=0;i<result.length;i++) {
+                        const review = result[i].review;
+                        const reviewBy = result[i].first_name + " " + result[i].last_name;
+                        const rating = result[i].rating;
+
+                        let yellowStar = '';
+                        for (let i=0;i<parseInt(rating);i++) {
+                            yellowStar += `<svg aria-hidden="true" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>First star</title><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`
+                        }
+                        let greyStar = '';
+                        for (let i=0;i<5-parseInt(rating);i++) {
+                            greyStar += `<svg aria-hidden="true" class="w-5 h-5 text-gray-300 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Fifth star</title><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`
+                        }
+
+                        $("#reviewCard").append(`
+                        <div class="h-80 p-3 w-full max-w-sm bg-black rounded-lg flex flex-col justify-evenly shadow-lg">
+                            <div class="h-full py-5 px-5 flex flex-col">
+                                <h5 class="text-2xl font-extrabold font-semibold tracking-tight text-white">${reviewBy}</h5>
+                                <p class="text-white text-base mb-2" id="commenter">${review}</p>
+                                <div class="flex items-center mt-2.5 mb-5">
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-4 py-1 rounded dark:bg-blue-200 dark:text-blue-800 mt-3" id="rating">${rating}/5</span>
+                                </div>
+                                <div class="flex items-center justify-between" style="flex: 1;">
+                                    <div class="flex items-center">
+                                        ${yellowStar}
+                                        ${greyStar}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     `
+                        )
+                        
+                    }
+
+
+                }
+            },
+            error: (xhr, status, error) => {
+                console.log(xhr.responseText, error);
+            }
+        });
+
+        // On click of login button, check if user has JWT key and userData key present.
+        // If yes, direct them to admin.html. If no, direct them to login.html
+        $("#login").click(()=> {
+            if (localStorage.getItem("userData") && localStorage.getItem("JWT")) {
+                // Ajax call to check if JWT is valid
+                const jwt = localStorage.getItem("JWT");
+                $.ajax({
+                    headers: {"authorization": `Bearer ${jwt}`},
+                    url: "http://localhost:8080/verifyToken",
+                    method: "GET",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: (res, status, xhr) => {
+                        // Valid JWT Token
+                        if (res && res.success) {
+                            $("#loginLink").attr("href", "admin");
+                            window.location.assign('admin');
+                        }
+                    },
+                    // Invalid JWT Token
+                    error: (xhr, status, error) => {
+                        $("#loginLink").attr("href", "login")
+                        window.location.assign('login');
+                    }
+                });
+            // No JWT Token
+            } else {
+                window.location.assign('login');
+            }
+        });
+
+        // On submit
+        $("#submit").click((e)=> {
+            e.preventDefault();
+            const stars = $("#stars").val();
+            const reviewComment = $("#reviewComment").val();
+            const userData = localStorage.getItem("userData");
+            const customer_id = JSON.parse(userData).customer_id;
+            const jwt = localStorage.getItem("JWT");
+
+            console.log(jwt);
+
+            console.log(filmid);
+
+            // Check if any of them are null or empty string
+            if (stars == null || stars == "" || reviewComment == null || reviewComment == "") {
+                $("#msg").html("Please fill all the fields");
+                return false;
+            }
+
+            const data = `
+            {
+                "rating": "${stars}",
+                "review": "${reviewComment}",
+                "customer_id": "${customer_id}"
+            }`;
+
+            console.log(data);
+            console.log(`http://localhost:8080/reviews/${filmid}`);
+
+            // Send ajax call
+            $.ajax({
+                headers: {"authorization": `Bearer ${jwt}`},
+                url: `http://localhost:8080/reviews/${filmid}`,
+                method: "POST",
+                data: data,
+                contentType: "application/json",
+                dataType: "json",
+                success: (res, status, xhr) => {
+                    if (res && res.success) {
+                        $("#msg").html("Review submitted successfully");
+                    }
+                },
+                error: (xhr, status, error) => {
+                    $("#msg").html(`Error! ${JSON.parse(xhr.responseText).error_msg}`);
+                }
+            });
+
+            return false;
+        });
+    });
+</script>
+
+<body>
+    <div class="flex flex-col h-full">
+        <!-- header -->
+        <header class="customHeader">
+            <div class="headerContainer">
+                <div class="innerHeader">
+                    <div class="logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a href="/"><img src="images/logo.png" alt="#" /></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button_section">
+                        <button class="button_header" style="padding: 8px;" id="login"><a href="login" id="loginLink">Login</a></li></button>
+                        <button class="button_header" style="display:flex;flex-direction:row;justify-content: center; padding-top: 0; padding-bottom: 0;"><img class="search_icon" src="images/search_icon.png" style="align-self: center;" /><a href="/search" style="padding:10px;">Search</a></li></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- end header -->
+        <div class="flex flex-col" id="content" style="flex-grow: 1;">
+            <div class="pl-4" id="main">
+                <!-- Title -->
+                <p class="font-bold text-3xl underline underline-offset-1 pb-5" id="filmTitle">Film Title</p>
+                <div class="flex flex-row pb-5">
+                <!-- Review Cards -->
+                    <div id="reviewCard" class="flex flex-row gap-10" style="display: flex;">
+                    </div>
+                    <!-- Review Cards End -->
+                </div>
+                <!-- Rating Form -->
+                <h1 class="font-bold text-xl underline underline-offset-1 pb-5">Send A Review</h1>
+                <div class="ratingForm">
+                    <form>
+                        <!-- Dropdown -->
+                        <div class="flex form-group ">
+                            <select id="stars" class="w-56 form-select appearance-none px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" style="border-radius: 1em;">
+                                <option value="none" selected disabled hidden>Choose a Rating</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+
+                        <div class="p-3"></div>
+
+                        <!-- Text Area -->
+                        <div class="flex form-group">
+                            <textarea id="reviewComment" class="w-96 form-textarea appearance-none px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" style="width: 25em;height: 10em;border-radius: 1em;" placeholder="Write your review here" ></textarea>
+                        </div>
+
+                        <div class="p-3"></div>
+
+                        <!-- Submit -->
+                        <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded" type="submit" id="submit">
+                            Send Review
+                        </button>
+                    </form>
+                    <div class="p-2"></div>
+                    <div id="msg"></div>
+                    <div class="p-20"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

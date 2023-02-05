@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <!-- Insert css -->
+    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/header.css">
+    <title>DVD</title>
+</head>
+
+<script>
+    $(document).ready(()=> {
+        // Ajax call to search all films (have no data)
+        $.ajax({
+            url: "http://localhost:8080/film/searchFilm",
+            method: "GET",
+            data: {
+                "category": "",
+                "titleSubstring": "",
+                "maxRental": ""
+            },
+            contentType: "application/json",
+            dataType: "json",
+            success: (res, status, xhr) => {
+                if (res && res.success) {
+                    const result = res.UserData;
+                    // First retrieve all films and remove everything
+                    const cardsContainer = $("#cardsContainer");
+                    // Remove all the children
+                    cardsContainer.html("");
+
+
+                    for (let i=0;i<result.length;i++) {
+                        const userData = result[i];
+                        const id = userData.film_id;
+                        const title = userData.title;
+                        const rating = userData.rating;
+                        const release_year = userData.release_year;
+                        const rental_rate = userData.rental_rate;
+                        const rental_duration = userData.rental_duration;
+
+                        // Create card "component"
+                        const card = 
+                        `
+                        <div class="h-80 w-full max-w-sm bg-black rounded-lg flex flex-col justify-evenly shadow-lg">
+                            <div class="h-full py-5 px-5 flex flex-col">
+                                <h5 class="text-2xl font-extrabold font-semibold tracking-tight text-white">${title}</h5>
+                                <p class="text-white text-base mb-2">${release_year}</p>
+                                <div class="flex items-center mt-2.5 mb-5">
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-4 py-1 rounded dark:bg-blue-200 dark:text-blue-800 mt-3" id="rating">${rating}</span>
+                                </div>
+                                <div class="flex items-center justify-between" style="flex: 1;">
+                                    <span class="text-xl font-bold text-white w-12" style="text-align: center;">$${rental_rate}/${rental_duration} days</span>
+                                    <a href="film?filmid=${id}" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-4 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                        // Update the post
+                        cardsContainer.append(card);
+                    }
+                }
+
+            },
+            error: (xhr, status, error) => {
+                alert(xhr.responseText, error);
+            }
+        });
+
+        // Ajax call to get categories
+        $.ajax({
+            url: `http://localhost:8080/film/AllCategory`,
+            method: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: (res, status, xhr) => {
+                const result = res.UserData;
+                // Add options to dropdown
+                const select = $("#chooseCategory");
+                select.html("");
+                select.append(`<option value="none" selected disabled hidden>Choose a Category</option>`);
+                for (let i=0;i<result.length;i++) {
+                    const userData = result[i];
+                    // New option
+                    option = `<option value="${userData.category_id}">${userData.name}</option>`;
+                    select.append(option);
+                }
+                select.append(`<option value="">All Categories</option>`);
+            },
+            error: (xhr, status, error) => {
+                console.log(error);
+            }
+        });
+
+        // On submit
+        $("#submit").click((e) => {
+            e.preventDefault();
+            const select = $("#chooseCategory").val();
+            const search = $("#default-search").val();
+            // Check if slider is enabled
+            // If disabled set value to empty string if its enabled use the value
+            const slider = $("#slider")[0].disabled ? "" : $("#slider").val();
+
+            // Since its in query string and not body, we don't use backticks
+            const data = {
+                "category": select,
+                "titleSubstring": search,
+                "maxRental": slider
+            }
+            // Ajax call to search films
+            $.ajax({
+                url: "http://localhost:8080/film/searchFilm",
+                method: "GET",
+                data: data,
+                contentType: "application/json",
+                dataType: "json",
+                success: (res, status, xhr) => {
+                    if (res && res.success) {
+                        const result = res.UserData;
+                        // First retrieve all films and remove everything
+                        const cardsContainer = $("#cardsContainer");
+                        // Remove all the children
+                        cardsContainer.html("");
+
+
+                        for (let i=0;i<result.length;i++) {
+                            const userData = result[i];
+                            const id = userData.film_id;
+                            const title = userData.title;
+                            const rating = userData.rating;
+                            const release_year = userData.release_year;
+                            const rental_rate = userData.rental_rate;
+                            const rental_duration = userData.rental_duration;
+
+                            // Create card "component"
+                            const card = 
+                            `
+                            <div class="h-80 w-full max-w-sm bg-black rounded-lg flex flex-col justify-evenly shadow-lg">
+                                <div class="h-full py-5 px-5 flex flex-col">
+                                    <h5 class="text-2xl font-extrabold font-semibold tracking-tight text-white">${title}</h5>
+                                    <p class="text-white text-base mb-2">${release_year}</p>
+                                    <div class="flex items-center mt-2.5 mb-5">
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-4 py-1 rounded dark:bg-blue-200 dark:text-blue-800 mt-3" id="rating">${rating}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between" style="flex: 1;">
+                                        <span class="text-xl font-bold text-white w-12" style="text-align: center;">$${rental_rate}/${rental_duration} days</span>
+                                        <a href="film?filmid=${id}" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-4 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            `
+                            // Update the post
+                            cardsContainer.append(card);
+                        }
+                    }
+
+                },
+                error: (xhr, status, error) => {
+                    console.log(error);
+                }
+            });
+            return false;
+        });
+
+        // On click of login button, check if user has JWT key and userData key present.
+        // If yes, direct them to admin.html. If no, direct them to login.html
+        $("#login").click(()=> {
+            if (localStorage.getItem("userData") && localStorage.getItem("JWT")) {
+                // Ajax call to check if JWT is valid
+                const jwt = localStorage.getItem("JWT");
+                $.ajax({
+                    headers: {"authorization": `Bearer ${jwt}`},
+                    url: "http://localhost:8080/verifyToken",
+                    method: "GET",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: (res, status, xhr) => {
+                        // Valid JWT Token
+                        if (res && res.success) {
+                            $("#loginLink").attr("href", "admin");
+                            window.location.assign('admin');
+                        }
+                    },
+                    // Invalid JWT Token
+                    error: (xhr, status, error) => {
+                        $("#loginLink").attr("href", "login")
+                        window.location.assign('login');
+                    }
+                });
+            // No JWT Token
+            } else {
+                window.location.assign('login');
+            }
+        });
+    });
+</script>
+
+<body>
+    <!-- header -->
+    <header class="customHeader">
+        <div class="headerContainer">
+            <div class="innerHeader">
+                <div class="logo_section">
+                    <div class="full">
+                        <div class="center-desk">
+                            <div class="logo">
+                                <a href="/"><img src="images/logo.png" alt="#" /></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button_section">
+                    <button class="button_header" style="padding: 8px;" id="login"><a href="login" id="loginLink">Login</a></li></button>
+                    <button class="button_header" style="display:flex;flex-direction:row;justify-content: center; padding-top: 0; padding-bottom: 0;"><img class="search_icon" src="images/search_icon.png" style="align-self: center;" /><a href="/search" style="padding:10px;">Search</a></li></button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- end header -->
+
+    <div class="self-container flex flex-col gap-y-12 pb-10">
+        <div class="customization-search">      
+            <form class="flex flex-col gap gap-6">
+                <div class="flex gap-5">
+                    <!-- Select dropdown -->
+                    <div class="flex justify-center form-group ">
+                        <select id="chooseCategory" class="w-56 form-select appearance-none px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" style="border-radius: 1em;">
+                            <option value="none" selected disabled hidden>Choose a Category</option>
+                        </select>
+                    </div>
+
+                    <!-- Search bar -->
+                    <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                    <div class="searchTitle relative flex form-group">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="search" id="default-search" class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Films">                            
+                    </div>
+                </div>
+
+                <!-- Slider -->
+                <div class="relative pt-1 form-group ">
+                    <label for="customRange3" class="form-label" style="display:flex;flex-direction:row;width:100%;justify-content:space-between;">
+                        <div class="flex gap-2">
+                            <input type="checkbox" onclick="sliderChangeState()" checked="checked">
+                            <span class="text-sm align-center">Filter By Price</span>
+                        </div>
+                        <div class="priceLabel" id="sliderValue">$5.99</div>
+                    </label>
+                    <input type="range" id="slider" class="priceRange form-range appearance-none w-full h-6 p-0 focus:outline-none focus:ring-0 focus:shadow-none" min="0.99" max="5.99" step="1" id="customRange3" value="5.99"/>
+                </div>
+
+                <button type="submit" id="submit" class="h-12 text-white right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-5 justify-items-center" id="cardsContainer">
+        <!-- Card Start -->
+            <div>There are no films. Server is down</div>
+        <!-- Card End -->
+    </div>
+
+</body>
+
+<script>
+    // Detect Value of Slider and Display
+    const slider = document.querySelector("#slider");
+    const output = document.querySelector("#sliderValue");
+
+    slider.oninput = () => {
+        output.innerHTML = "$" + slider.value;
+    }
+
+    // Enable/Disable Slider
+    sliderChangeState = () => {
+        if (slider.disabled) {
+            slider.disabled = false;
+            slider.classList.remove("priceRangeDisabled");
+            slider.classList.add("priceRange");
+        } else {
+            slider.disabled = true;
+            slider.classList.remove("priceRange");
+            slider.classList.add("priceRangeDisabled");
+        }
+    }
+
+
+
+</script>
+
+</html>

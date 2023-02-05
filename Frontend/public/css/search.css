@@ -1,0 +1,64 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #66748d;
+}
+
+
+.self-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.inner-container {
+    display: flex;
+}
+
+.customization-search {
+    align-self: center;
+    margin:20px 0;
+    width: 50%;
+}
+
+.priceRange {
+    height: 3px;
+    border-radius: 3em;
+    background: #000;
+}
+
+.priceLabel {
+    border-color: #000;
+    outline-style: solid;
+    background-color: #fffacd;
+}
+
+.priceRangeDisabled {
+    height: 3px;
+    border-radius: 3em;
+    background: #e0e0e0;
+}
+
+.searchTitle {
+    flex: 1 1 0;
+}
+
+/* Film */
+.main-content {
+    width: 50%;
+    height: 75%;
+    background-color: rgb(239, 239, 203);
+    border-radius: 2em;
+}
+
+.categoryButton {
+    border:3px solid rgb(53, 53, 46);
+    padding-top:0.125rem;
+    padding-bottom:0.25rem;
+}
+
+.reviewLink {
+    color: rgb(70, 207, 42);
+    text-decoration: underline;
+}

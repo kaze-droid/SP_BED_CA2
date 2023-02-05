@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <!-- Insert css -->
+    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/header.css">
+    <title id="title"></title>
+</head>
+
+
+<script>
+    $(document).ready(() => {
+        // Get details of specific film id based on url
+        // Get film_id from query
+        const urlParams = new URLSearchParams(window.location.search);
+        let filmid = "";
+        if (urlParams.has("filmid")) {
+            filmid = urlParams.get("filmid");
+        } else {
+            console.log("error");
+            window.location.assign("search");
+        }
+        // Make an ajax call to get data based on film id
+        $.ajax({
+            url: `http://localhost:8080/film/${filmid}`,
+            method: "GET",
+            success: (res, status, xhr) => {
+                if (res && res.success) {
+                    // Result is an array of json objects. All the properties are the same except for 
+                    // Actor first name and last name
+                    const userdata = res.UserData[0];
+
+                    const title = $("title");
+                    const filmTitle = $("#filmTitle");
+
+                    const release_year = $("#release_year");
+                    const rating = $('#rating');
+
+                    const category = $("#category");
+
+                    const description = $("#description");
+                    const actor = $("#actor");
+                    const special_features = $("#special_features");
+                    const language = $("#language");
+
+                    const review = $("#reviewLink");
+
+
+                    title.html(userdata.title);
+                    filmTitle.html(userdata.title);
+
+                    release_year.html(userdata.release_year);
+                    rating.html(userdata.rating);
+
+                    category.html(userdata.category);
+                    description.html(userdata.description);
+
+                    // First actor
+                    actor.append(userdata.first_name + " " + userdata.last_name);
+                    // Rest will loop through result
+                    for (let i=1;i<res.UserData.length;i++) {
+                        actor.append(" · " + res.UserData[i].first_name + " " + res.UserData[i].last_name)
+                    }
+                    special_features.html(userdata.special_features.split(',').join(', '));
+                    language.html(userdata.language);
+
+                    // Edit review link
+                    review.attr("href", `review?filmid=${filmid}`);
+                }
+            },
+            error: (xhr, status, error) => {
+                console.log(xhr.responseText, error);
+            }
+        });
+
+        // On click of login button, check if user has JWT key and userData key present.
+        // If yes, direct them to admin.html. If no, direct them to login.html
+        $("#login").click(()=> {
+            if (localStorage.getItem("userData") && localStorage.getItem("JWT")) {
+                // Ajax call to check if JWT is valid
+                const jwt = localStorage.getItem("JWT");
+                $.ajax({
+                    headers: {"authorization": `Bearer ${jwt}`},
+                    url: "http://localhost:8080/verifyToken",
+                    method: "GET",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: (res, status, xhr) => {
+                        // Valid JWT Token
+                        if (res && res.success) {
+                            $("#loginLink").attr("href", "admin");
+                            window.location.assign('admin');
+                        }
+                    },
+                    // Invalid JWT Token
+                    error: (xhr, status, error) => {
+                        $("#loginLink").attr("href", "login")
+                        window.location.assign('login');
+                    }
+                });
+            // No JWT Token
+            } else {
+                window.location.assign('login');
+            }
+        });
+    });
+</script>
+
+<body>
+    <div class="flex flex-col h-full">
+        <!-- header -->
+        <header class="customHeader">
+            <div class="headerContainer">
+                <div class="innerHeader">
+                    <div class="logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a href="/"><img src="images/logo.png" alt="#" /></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button_section">
+                        <button class="button_header" style="padding: 8px;" id="login"><a href="login" id="loginLink">Login</a></li></button>
+                        <button class="button_header" style="display:flex;flex-direction:row;justify-content: center; padding-top: 0; padding-bottom: 0;"><img class="search_icon" src="images/search_icon.png" style="align-self: center;" /><a href="/search" style="padding:10px;">Search</a></li></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- end header -->
+        <div class="flex flex-col items-center justify-center" id="content" style="flex-grow: 1;">
+            <div class="main-content p-3 pl-6 m-2" id="main">
+                <!-- Title -->
+                <p class="font-bold text-3xl underline underline-offset-1" id="filmTitle">Film Title</p>
+                <div class="flex flex-row">
+                    <div class="w-1/2">
+                        <div class="h-2"></div>
+                        <!-- Release Year + Rating -->
+                        <div class="flex flex-row gap-1">
+                            <p id="release_year">Rating Year</p>
+                            <p class="font-black">·</p>
+                            <p id="rating">Rating</p>
+                        </div>
+                        <div class="h-4"></div>
+                        <!-- Category -->
+                        <div><button class="px-2 rounded-3xl categoryButton" id="category">Category</button></div>
+                        <div class="h-4"></div>
+                    </div>
+                    <div class="w-1/2">
+                        <div class="h-2"></div>
+                        <div id="others"></div>
+                    </div>
+                </div>
+                <!-- Description -->
+                <div>
+                    <b>Description: </b>
+                    <div id="description"></div>
+                </div>
+
+                <div>
+                    <div class="h-2"></div>
+                    <hr style="border-color: #000;">
+                    <div class="h-2"></div>
+                </div>
+                <!-- Actor -->
+                <div>
+                    <b>Cast Members: </b>
+                    <div id="actor"></div>
+                </div>
+                    
+                <div>
+                    <div class="h-2"></div>
+                    <hr style="border-color: #000;">
+                    <div class="h-2"></div>
+                </div>
+                <!-- Special Feature -->
+                <div>
+                    <b>Special Features</b>
+                    <div id="special_features"></div>
+                </div>
+                <div>
+                    <div class="h-2"></div>
+                    <hr style="border-color: #000;">
+                    <div class="h-2"></div>
+                </div>
+                <!-- Language -->
+                <div>
+                    <b>Language: </b>
+                    <div id="language"></div>
+                </div>
+                <div>
+                    <div class="h-2"></div>
+                    <hr style="border-color: #000;">
+                    <div class="h-2"></div>
+                </div>
+                <span><a class="reviewLink" id="reviewLink" href="review?filmid=1">Leave a review</a></span>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

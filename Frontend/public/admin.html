@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <!-- Insert css -->
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/header.css">
+    <title>Admin Page</title>
+</head>
+
+<script>
+    $(document).ready(()=> {
+        // On Logout
+        $("#logout").click(()=> {
+            localStorage.clear();
+            window.location.assign("/");
+            return false;
+        });
+
+        // Redirect to login page if no JWT
+        const jwt = localStorage.getItem("JWT");
+        const userData = localStorage.getItem("userData");
+        if (jwt == null || userData == null || jwt == "" || userData == "" || 'customer_id' in JSON.parse(userData) || 'staff_id' in JSON.parse(userData) == false || JSON.parse(userData).staff_id == null) {
+            window.location.assign("login");
+        }
+        // If is customer redirect to customer page
+        if ('customer_id' in JSON.parse(userData)) {
+            window.location.assign("customer");
+        }
+
+        
+
+        console.log(userData);
+        
+        // If user has JWT and userData display the userdata
+        if (localStorage.getItem("JWT") && localStorage.getItem("userData")) {
+            const userData = JSON.parse(localStorage.getItem("userData"));
+
+            $("#name").html(userData.first_name + " " + userData.last_name);
+            $("#email").html(userData.email);
+            $("#profile").attr("src", `./profile/profile${userData.profile}.png`);
+        }
+    });
+</script>
+
+<body>
+    <!-- header -->
+    <header class="customHeader">
+        <div class="headerContainer">
+            <div class="innerHeader">
+                <div class="logo_section">
+                    <div class="full">
+                        <div class="center-desk">
+                            <div class="logo">
+                                <a href="/"><img src="images/logo.png" alt="#" /></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button_section">
+                    <button class="button_header" style="padding: 8px;"><a href="/admin">Staff Home Page</a></li></button>
+                    <button class="button_header" style="padding: 8px;"><a href="/addActor">Add New Actor</a></li></button>
+                    <button class="button_header" style="padding: 8px;"><a href="/addCustomer">Add New Customer</a></li></button>
+                    <button class="button_header" style="padding: 8px;"><a href="/" id="logout">Log Out</a></li></button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- end header -->
+    <div class="mainContent flex flex-col pt-8 pl-12">
+        <div>
+            <div>
+                <b>Profile: </b>
+                <div ><img id="profile" src="./profile/profile56.png" style="border: 5px solid #555; border-radius: 2em;"></div>
+            </div>
+            <div>
+                <b>Name: </b>
+                <div id="name"></div>
+            </div>
+    
+            <div>
+                <b>Email: </b>
+                <div id="email"></div>
+            </div>
+        </div>
+    </div>
+</body>

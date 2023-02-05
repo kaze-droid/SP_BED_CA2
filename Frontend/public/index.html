@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- basic -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- mobile metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
+    <title>SP DVD Rental</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Header css -->
+    <link rel="stylesheet" href="css/header.css">
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- style css -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Loader -->
+    <link rel="stylesheet" href="css/loader.css">
+    <!-- fevicon -->
+    <link rel="icon" href="images/fevicon.png" type="image/gif" />
+    <!-- Scrollbar Custom CSS -->
+    <link rel="stylesheet" href="css/jquery.mCustomScrollbar.min.css">
+    <!-- Tweaks for older IEs-->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
+    <!-- Jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
+</head>
+<!-- body -->
+
+<script>
+    $(document).ready(()=> {
+        // On click of login button, check if user has JWT key and userData key present.
+        // If yes, direct them to admin.html. If no, direct them to login.html
+        $("#login").click(()=> {
+            if (localStorage.getItem("userData") && localStorage.getItem("JWT")) {
+                // Ajax call to check if JWT is valid
+                const jwt = localStorage.getItem("JWT");
+                $.ajax({
+                    headers: {"authorization": `Bearer ${jwt}`},
+                    url: "http://localhost:8080/verifyToken",
+                    method: "GET",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: (res, status, xhr) => {
+                        // Valid JWT Token
+                        if (res && res.success) {
+                            $("#loginLink").attr("href", "admin");
+                            window.location.assign('admin');
+                        }
+                    },
+                    // Invalid JWT Token
+                    error: (xhr, status, error) => {
+                        $("#loginLink").attr("href", "login")
+                        window.location.assign('login');
+                    }
+                });
+            // No JWT Token
+            } else {
+                window.location.assign('login');
+            }
+        });
+    });
+</script>
+
+<body class="main-layout" style="display: flex;flex-direction: column;">
+    <!-- loader  -->
+    <div class="loader_bg">
+        <div class="loader"><img src="images/loading.gif" alt="#" /></div>
+    </div>
+    <!-- end loader -->
+    <!-- header -->
+    <div class="outer-header">
+        <!-- header -->
+        <header class="customHeader">
+            <div class="headerContainer">
+                <div class="innerHeader">
+                    <div class="logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a href="/"><img src="images/logo.png" alt="#" /></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button_section">
+                        <button class="button_header" style="padding: 8px;" id="login"><a href="login" id="loginLink">Login</a></li></button>
+                        <button class="button_header" style="display:flex;flex-direction:row;justify-content: center; padding-top: 0; padding-bottom: 0;"><img class="search_icon" src="images/search_icon.png" style="align-self: center;" /><a href="/search" style="padding:10px;">Search</a></li></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- end header -->
+        <section class="slider_section">
+            <div class="banner_main">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="">
+                            <div class="text-bg">
+                                <h1>amazing<br>movie rental</h1>
+                                <span>Rent DVD films made exclusively by SP<br>While stocks last!</span>
+                                <a href="https://ryanyeo.vercel.app">Learn More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- end header inner -->
+
+            <!-- end header -->
+    </header>
+    <!--  footer -->
+    <footer>
+        <div class="footer ">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Newsletter</h2>
+                    </div>
+                    <div class="col-md-10 offset-md-1">
+                        <form class="news">
+                            <input class="newslatter" placeholder="Enter Your Email" type="text" name="Enter Your Email">
+                            <button class="submit">Subscribe</button>
+                        </form>
+                    </div>
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 ">
+                        <div class="row">
+                            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 ">
+                                <div class="address">
+                                    <ul class="social_link">
+                                        <li><a href="#"><img src="icon/fb.png"></a></li>
+                                        <li><a href="#"><img src="icon/tw.png"></a></li>
+                                        <li><a href="#"><img src="icon/lin(2).png"></a></li>
+                                         <li><a href="#"><img src="icon/instagram.png"></a></li>
+                                    </ul>
+                                    <a href="/"> <img src="images/logo.png" alt="logo"></a>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="address">
+                                    <h3>Quick links</h3>
+                                    <ul class="Menu_footer">
+                                        <li class="active"> <img src="images/3.png" alt="#"> <a href="#game">Game</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#software">Software</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#about">About</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#testimonial"> Testimonial</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#contact">Contact</a> </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="address">
+                                    <h3>downloded</h3>
+                                    <ul class="Links_footer">
+                                        <li class="active"><img src="images/3.png" alt="#"> <a href="#">Lorem Ipsum </a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#">These</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#">Are</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#">Some</a> </li>
+                                        <li><img src="images/3.png" alt="#"> <a href="#">Downloads</a> </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 col-sm-6 ">
+                                <div class="address">
+                                    <h3>Contact us </h3>
+                                    <ul class="loca">
+                                        <li>
+                                            <a href="#"><img src="icon/loc.png" alt="#" /></a>500 Dover Rd
+                                            <br>Singapore Poly</li>
+                                        <li>
+                                            <a href="#"><img src="icon/email.png" alt="#" /></a><div style="align-self: end;">contactus@sp.edu.sg</div> </li>
+                                        <li>
+                                            <a href="#"><img src="icon/call.png" alt="#" /></a><div style="align-self: end;">6775 1133</div> </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="copyright">
+                <div class="container">
+                    <p>© 2023 All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- end footer -->
+    <!-- Javascript files-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="js/plugin.js"></script>
+    <!-- sidebar -->
+    <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="https:cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+
+</body>
+
+</html>

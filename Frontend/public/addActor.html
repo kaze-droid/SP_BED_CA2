@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <!-- Insert css -->
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/header.css">
+    <title>Admin Page</title>
+</head>
+
+<script>
+    $(document).ready(()=> {
+        // On Logout
+        $("#logout").click(()=> {
+            localStorage.clear();
+            window.location.assign("/");
+            return false;
+        });
+
+        // Redirect to login page if no JWT
+        const jwt = localStorage.getItem("JWT");
+        const userData = localStorage.getItem("userData");
+        if (jwt == null || userData == null) {
+            window.location.assign("login");
+        }
+
+        // On Submit
+        $("#submit").click((e)=> {
+            e.preventDefault();
+            const firstname = $("#firstname").val();
+            const lastname = $("#lastname").val();
+
+            const data = `
+            {
+                "first_name":"${firstname}",
+                "last_name":"${lastname}"
+            }`;
+
+            const jwt = localStorage.getItem("JWT");
+
+            // Ajax call
+            $.ajax({
+                headers: {"authorization": `Bearer ${jwt}`},
+                url: "http://localhost:8080/actors",
+                method: "POST",
+                data: data,
+                contentType: "application/json",
+                dataType: "json",
+                success: (res, status, xhr) => {
+                    if (res && res.success) {
+                        $("#msg").html(`Successfully added new actor with id ${res.UserData}!`);
+                    }
+                },
+                error: (xhr, status, error) => {
+                    $("#msg").html(`Error! ${JSON.parse(xhr.responseText).error_msg}`);
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+<body>
+    <!-- header -->
+    <header class="customHeader">
+        <div class="headerContainer">
+            <div class="innerHeader">
+                <div class="logo_section">
+                    <div class="full">
+                        <div class="center-desk">
+                            <div class="logo">
+                                <a href="/"><img src="images/logo.png" alt="#" /></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button_section">
+                    <button class="button_header" style="padding: 8px;"><a href="/admin">Staff Home Page</a></li></button>
+                    <button class="button_header" style="padding: 8px;"><a href="/addActor">Add New Actor</a></li></button>
+                    <button class="button_header" style="padding: 8px;"><a href="/addCustomer">Add New Customer</a></li></button>
+                    <button class="button_header" style="padding: 8px;"><a href="/" id="logout">Log Out</a></li></button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- end header -->
+    <div class="flex flex-col gap-12 items-center mainContent">
+        <div class="h-4"></div>
+        <div class="font-bold underline text-5xl">Add Actor</div>
+        <form class="w-full max-w-sm">
+            <div class="flex items-center border-b border-teal-500 py-2">
+              <input class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" type="text" id="firstname" placeholder="First Name" aria-label="First name">
+            </div>
+            <div class="flex items-center border-b border-teal-500 py-2">
+                <input class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" type="text" id="lastname" placeholder="Last Name" aria-label="Last name">
+            </div>
+            <div class="h-4"></div>
+            <button class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded" type="submit" id="submit">
+                Submit
+            </button>
+          </form>
+        <div id="msg"></div>
+    </div>
+</body>
