@@ -27,6 +27,10 @@
         if (jwt == null || userData == null) {
             window.location.assign("login");
         }
+        // If is customer redirect to customer page
+        if ('customer_id' in JSON.parse(userData)) {
+            window.location.assign("customer");
+        }
 
         // On Submit
         $("#submit").click((e)=> {
